@@ -4,11 +4,12 @@ import { TouchableOpacity, Text, StyleSheet } from "react-native";
 const HyperLink = (props) => {
     const {
         children,
-        style
+        style,
+        onPress
     } = props;
 
     return (
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onPress}>
             <Text
                 style={[
                     styles.text,

@@ -5,8 +5,8 @@ import SetupScreen from "../screens/SetupScreen";
 import MainScreen from "../screens/MainScreen";
 
 const appNavigator = createSwitchNavigator({
-    ResolveSettings: ResolveSettingsScreen,
-    Setup: SetupScreen,
+    //ResolveSettings: ResolveSettingsScreen,
+    //Setup: SetupScreen,
     Main: MainScreen,
 });
 
