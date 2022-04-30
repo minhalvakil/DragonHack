@@ -18,13 +18,15 @@ import FIPS from "../FIPS/FIPS.json";
 import axios from "axios";
 import * as Linking from "expo-linking";
 import environment_variables from "../../environment_variables.json";
-import { WebView } from 'react-native-webview';
 
 const MainScreen = ({ navigation }) => {
     const [errorMessage, setErrorMessage] = useState(null);
     const [answer, setAnswer] = useState(null);
     const [communityLevel, setCommunityLevel] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
+    const [weeklyCases, setWeeklyCases] = useState(null);
+    const [newHospitalizations, setNewHospitalizations] = useState(null);
+    const [percentVaccinated, setPercentVaccinated] = useState(null);
     //const [settings, setSettings] = useState(null);
 
     const API_KEY = environment_variables["API_KEY"];
@@ -66,7 +68,20 @@ const MainScreen = ({ navigation }) => {
                         url: `https://api.covidactnow.org/v2/county/${fipsCode}.json?apiKey=${API_KEY}`
                     })
                     .then(response => {
-                        const commLevel = response.data.communityLevels.cdcCommunityLevel;
+                        const {
+                            data
+                        } = response;
+                        const {
+                            metrics: {
+                                weeklyNewCasesPer100k,
+                                weeklyCovidAdmissionsPer100k,
+                                vaccinationsInitiatedRatio
+                            }
+                        } = data;
+                        setWeeklyCases(weeklyNewCasesPer100k);
+                        setNewHospitalizations(weeklyCovidAdmissionsPer100k);
+                        setPercentVaccinated(vaccinationsInitiatedRatio * 100);
+                        const commLevel = data.communityLevels.cdcCommunityLevel;
                         switch(commLevel){
                             case 0:
                                 setAnswer("No");
@@ -192,7 +207,15 @@ const MainScreen = ({ navigation }) => {
                     style={styles.popup}
                 >
                     <View>
-                        <Text>sdfsdf</Text>
+                        <Text style={styles.statHeader}>Weekly Cases</Text>
+                        <Text style={styles.stat}>{weeklyCases || "Loading"}</Text>
+                        <Text style={styles.statFooter}>per 100k people</Text>
+                        <Text style={styles.statHeader}>New Hospitalizations</Text>
+                        <Text style={styles.stat}>{newHospitalizations || "Loading"}</Text>
+                        <Text style={styles.statFooter}>per 100k people</Text>
+                        <Text style={styles.statHeader}>Vaccinated</Text>
+                        <Text style={styles.stat}>{percentVaccinated ? `${percentVaccinated}%` : "Loading"}</Text>
+                        <Text style={styles.statFooter}>with 1 or more doses</Text>
                     </View>
                     <View style={styles.popupFooter}>
                         <Button
@@ -269,7 +292,8 @@ const styles = StyleSheet.create({
         width: 200,
         textAlign: "center",
         alignSelf: "center",
-        marginVertical: 25
+        marginVertical: 25,
+        color: "#437EB4"
     },
     popup: {
         backgroundColor: "white",
@@ -286,6 +310,23 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.2,
         shadowRadius: 15,
+    },
+    statHeader: {
+        fontSize: 32,
+        textAlign: "center",
+        marginTop: 25,
+        fontWeight: "500",
+        color: "#1F2A35"
+    },
+    stat: {
+        fontSize: 24,
+        textAlign: "center",
+        marginTop: 25
+    },
+    statFooter: {
+        fontSize: 18,
+        textAlign: "center",
+        marginTop: 25
     }
 });
 
