@@ -15,9 +15,11 @@ if __name__ == '__main__':
     data = {}
     for i in df.index:
         if df['StateAbbr'][i] in data.keys():
-            data[df['StateAbbr'][i]].append({df['CountyName'][i] : str(df['CountyFIPS'][i])})
+            fips_code = df['CountyFIPS'][i]
+            data[df['StateAbbr'][i]].append({df['CountyName'][i] : f'{fips_code:05d}'})
         else:
-            data[df['StateAbbr'][i]] = [{df['CountyName'][i] : str(df['CountyFIPS'][i])}]
+            fips_code = df['CountyFIPS'][i]
+            data[df['StateAbbr'][i]] = [{df['CountyName'][i] : f'{fips_code:05d}'}]
 
     with open("FIPS.json", "w") as write_file:
         json.dump(data, write_file, indent = 4)
