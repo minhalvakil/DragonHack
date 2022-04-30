@@ -8,9 +8,9 @@ import {
     Image,
     ImageBackground,
     StatusBar,
-    Modal,
-    TouchableOpacity
+    Modal
 } from "react-native";
+import Button from "../components/Button";
 import HyperLink from "../components/HyperLink";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import requestLocation from "../helpers/requestLocation";
@@ -18,6 +18,7 @@ import FIPS from "../FIPS/FIPS.json";
 import axios from "axios";
 import * as Linking from "expo-linking";
 import environment_variables from "../../environment_variables.json";
+import { WebView } from 'react-native-webview';
 
 const MainScreen = ({ navigation }) => {
     const [errorMessage, setErrorMessage] = useState(null);
@@ -190,16 +191,15 @@ const MainScreen = ({ navigation }) => {
                 <View
                     style={styles.popup}
                 >
-                    <HyperLink
-                        onPress={togglePopup}
-                        style={{
-                            textDecorationLine: "none",
-                            alignSelf: "flex-end",
-                            fontSize: 40
-                        }}
-                    >
-                        X
-                    </HyperLink>
+                    <View>
+                        <Text>sdfsdf</Text>
+                    </View>
+                    <View style={styles.popupFooter}>
+                        <Button
+                            title="Close"
+                            onPress={togglePopup}
+                        />
+                    </View>
                 </View>
             </Modal>
         </SafeAreaView>
@@ -274,6 +274,7 @@ const styles = StyleSheet.create({
     popup: {
         backgroundColor: "white",
         flex: 1,
+        justifyContent: "space-between",
         margin: 20,
         marginVertical: 50,
         padding: 20,
