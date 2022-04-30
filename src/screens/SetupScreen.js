@@ -7,30 +7,10 @@ import {
 } from "react-native";
 import Selection from "../components/Selection";
 import Button from "../components/Button";
-import requestLocation from "../helpers/requestLocation";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SetupScreen = ({ navigation }) => {
-    const [location, setLocation] = useState(null);
-    const [errorMessage, setErrorMessage] = useState(null);
     const [mandateOnly, setMandateOnly] = useState(true);
-
-    // Get location on load
-    useEffect(() => {
-        requestLocation()
-        .then(location => {
-            setLocation(location);
-        })
-        .catch(error => {
-            setErrorMessage(error.message);
-        });
-    }, []);
-
-    let text = errorMessage || (
-        location
-            ? JSON.stringify(location)
-            : 'Waiting..'
-    );
 
     const onsubmit = () => {
         AsyncStorage.setItem('settings', JSON.stringify({

@@ -8,12 +8,16 @@ import {
     Image,
     ImageBackground
 } from "react-native";
-import Button from "../components/Button";
+import HyperLink from "../components/HyperLink";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import requestLocation from "../helpers/requestLocation";
+import FIPS from "../FIPS/FIPS.json";
 
 const MainScreen = ({ navigation }) => {
-    const [settings, setSettings] = useState(null);
+    const [errorMessage, setErrorMessage] = useState(null);
     const [answer, setAnswer] = useState(null);
+    const [settings, setSettings] = useState(null);
+    const [fipsCode, setFipsCode] = useState(null);
 
     const onResetSettings = () => {
         AsyncStorage.removeItem('settings')
@@ -29,6 +33,20 @@ const MainScreen = ({ navigation }) => {
         AsyncStorage.getItem('settings')
         .then(value => {
             setSettings(JSON.parse(value));
+            
+            // Get the user's location
+            requestLocation()
+            .then(location => {
+                const stateFIPS = FIPS[location.region];
+                stateFIPS.forEach(item => {
+                    if(item[location.city] !== undefined){
+                        setFipsCode(item[location.city]);
+                    }
+                });
+            })
+            .catch(error => {
+                setErrorMessage(error.message);
+            });
         });
     }, []);
 
@@ -54,20 +72,24 @@ const MainScreen = ({ navigation }) => {
                         style={styles.speechBubble}
                     >
                         <Text style={styles.answer}>
-                            {answer || "..."}
+                            {fipsCode || "..."}
                         </Text>
                     </ImageBackground>
                 </View>
             </View>
             <View>
-                <Button
-                    title="Reset settings"
+                <HyperLink
                     onPress={onResetSettings}
-                />
-                <Button
-                    title="Reset settings"
+                    style={styles.link}
+                >
+                    More Info
+                </HyperLink>
+                <HyperLink
                     onPress={onResetSettings}
-                />
+                    style={styles.link}
+                >
+                    Reset settings
+                </HyperLink>
             </View>
         </SafeAreaView>
     );
@@ -101,6 +123,10 @@ const styles = StyleSheet.create({
     },
     answer: {
         fontSize: 32
+    },
+    link: {
+        alignSelf: "center",
+        marginBottom: 20
     }
 });
 
