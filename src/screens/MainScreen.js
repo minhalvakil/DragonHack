@@ -6,20 +6,27 @@ import {
     Text,
     View,
     Image,
-    ImageBackground
+    ImageBackground,
+    StatusBar,
+    Modal,
+    TouchableOpacity
 } from "react-native";
 import HyperLink from "../components/HyperLink";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import requestLocation from "../helpers/requestLocation";
 import FIPS from "../FIPS/FIPS.json";
 import axios from "axios";
-import * as Linking from 'expo-linking';
+import * as Linking from "expo-linking";
+import environment_variables from "../../environment_variables.json";
 
 const MainScreen = ({ navigation }) => {
     const [errorMessage, setErrorMessage] = useState(null);
     const [answer, setAnswer] = useState(null);
     const [communityLevel, setCommunityLevel] = useState(null);
+    const [showPopup, setShowPopup] = useState(false);
     //const [settings, setSettings] = useState(null);
+
+    const API_KEY = environment_variables["API_KEY"];
 
     const onResetSettings = () => {
         AsyncStorage.removeItem('settings')
@@ -33,6 +40,10 @@ const MainScreen = ({ navigation }) => {
 
     const onLearnCdc = () => {
         Linking.openURL("https://www.cdc.gov/coronavirus/2019-ncov/your-health/covid-by-county.html");
+    };
+
+    const togglePopup = () => {
+        setShowPopup(!showPopup);
     };
 
     useEffect(() => {
@@ -49,7 +60,6 @@ const MainScreen = ({ navigation }) => {
                 if(item[location.city] !== undefined){
                     noResults = false;
                     const fipsCode = item[location.city];
-                    const API_KEY = "6729f851afe44c8782ea316bb783fbaf";
                     axios({
                         method: "get",
                         url: `https://api.covidactnow.org/v2/county/${fipsCode}.json?apiKey=${API_KEY}`
@@ -102,6 +112,7 @@ const MainScreen = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.container}>
+            <StatusBar barStyle="dark-content"/>
             <View style={styles.main}>
                 <Text style={styles.header}>
                     Should you wear a mask today?
@@ -156,6 +167,7 @@ const MainScreen = ({ navigation }) => {
             <View>
                 <HyperLink
                     style={styles.link}
+                    onPress={togglePopup}
                 >
                     More Info
                 </HyperLink>
@@ -166,6 +178,30 @@ const MainScreen = ({ navigation }) => {
                     Reset settings
                 </HyperLink>*/}
             </View>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showPopup}
+                onRequestClose={() => {
+                    Alert.alert("Modal has been closed.");
+                    setShowPopup(!showPopup);
+                }}
+            >
+                <View
+                    style={styles.popup}
+                >
+                    <HyperLink
+                        onPress={togglePopup}
+                        style={{
+                            textDecorationLine: "none",
+                            alignSelf: "flex-end",
+                            fontSize: 40
+                        }}
+                    >
+                        X
+                    </HyperLink>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };
@@ -234,6 +270,21 @@ const styles = StyleSheet.create({
         textAlign: "center",
         alignSelf: "center",
         marginVertical: 25
+    },
+    popup: {
+        backgroundColor: "white",
+        flex: 1,
+        margin: 20,
+        marginVertical: 50,
+        padding: 20,
+        borderRadius: 25,
+        shadowColor: 'grey',
+        shadowOffset: {
+            width: 0,
+            height: 0
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 15,
     }
 });
 
