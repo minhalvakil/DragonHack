@@ -27,6 +27,7 @@ const MainScreen = ({ navigation }) => {
     const [weeklyCases, setWeeklyCases] = useState(null);
     const [newHospitalizations, setNewHospitalizations] = useState(null);
     const [percentVaccinated, setPercentVaccinated] = useState(null);
+    const [location, setLocation] = useState(null);
     //const [settings, setSettings] = useState(null);
 
     const API_KEY = environment_variables["API_KEY"];
@@ -62,7 +63,19 @@ const MainScreen = ({ navigation }) => {
             stateFIPS.forEach(item => {
                 if(item[location.city] !== undefined){
                     noResults = false;
-                    const fipsCode = item[location.city];
+                    let fipsCode = item[location.city];
+                    // High risk location
+                    //setLocation("Hamilton, NY");
+                    //fipsCode = 36041
+                    // Medium risk location
+                    //setLocation("Middlesex, MA");
+                    //fipsCode = 25017
+                    // Low risk location
+                    //fipsCode = 42101
+                    //setLocation("Philadelphia, PA");
+                    // Unkown risk location
+                    //fipsCode = 29204
+                    //setLocation("Shanon County, MO");
                     axios({
                         method: "get",
                         url: `https://api.covidactnow.org/v2/county/${fipsCode}.json?apiKey=${API_KEY}`
@@ -81,6 +94,7 @@ const MainScreen = ({ navigation }) => {
                         setWeeklyCases(weeklyNewCasesPer100k);
                         setNewHospitalizations(weeklyCovidAdmissionsPer100k);
                         setPercentVaccinated(vaccinationsInitiatedRatio * 100);
+                        setLocation(`${location.city}, ${location.region}`);
                         const commLevel = data.communityLevels.cdcCommunityLevel;
                         switch(commLevel){
                             case 0:
@@ -99,7 +113,8 @@ const MainScreen = ({ navigation }) => {
                         }
                     })
                     .catch(error => {
-                        Alert.alert("An error occured", error.message);
+                        Alert.alert("Could not find COVID data in your region");
+                        setCommunityLevel("N/A");
                     })
                 }
             });
@@ -156,6 +171,30 @@ const MainScreen = ({ navigation }) => {
                 </Text>
             </View>
             <View>
+                <Text style={[
+                    styles.communityLevelLabel,
+                    styles.location
+                ]}>
+                    {
+                        location ? (
+                        <>
+                            <Image
+                                source={require("../../assets/location.png")}
+                                style={styles.locationImage}
+                                resizeMode="contain"
+                            />
+                            <View
+                                style={{
+                                    width: 10
+                                }}
+                            />
+                            <Text>
+                                {location}
+                            </Text>
+                        </>
+                        ) : "Loading"
+                    }
+                </Text>
                 <Text style={styles.communityLevelLabel}>
                     Community Level:
                 </Text>
@@ -167,7 +206,9 @@ const MainScreen = ({ navigation }) => {
                                 ? "#00BA3F"
                                 : communityLevel === "Medium"
                                     ? "#BA9100"
-                                    : "#F44242"
+                                    : communityLevel === "High"
+                                        ? "#F44242"
+                                        : "black"
                         } : {}
                     ]}
                 >
@@ -244,10 +285,13 @@ const styles = StyleSheet.create({
     fauci: {
         marginTop: 50,
         flexDirection: "row",
+        justifyContent: "center",
     },
     fauciImage: {
         borderRadius: 999,
-        marginTop: 100
+        marginTop: 100,
+        height: 150,
+        width: 150,
     },
     speechBubble: {
         width: 200,
@@ -292,7 +336,7 @@ const styles = StyleSheet.create({
         width: 200,
         textAlign: "center",
         alignSelf: "center",
-        marginVertical: 25,
+        marginTop: 25,
         color: "#437EB4"
     },
     popup: {
@@ -327,6 +371,14 @@ const styles = StyleSheet.create({
         fontSize: 18,
         textAlign: "center",
         marginTop: 25
+    },
+    location: {
+        marginBottom: 25,
+        alignSelf: "center",
+    },
+    locationImage: {
+        width: 14,
+        height: 24
     }
 });
 
