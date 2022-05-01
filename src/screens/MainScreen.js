@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
         fontSize: 28,
         opacity: 0.5,
         textAlign: "center",
-        marginTop: 50
+        marginTop: 25
     },
     fauci: {
         marginTop: 50,
